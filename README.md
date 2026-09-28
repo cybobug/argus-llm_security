@@ -164,8 +164,62 @@ cd attack-engine
 ---
 
 ## 🛡️ OWASP Top 10 for LLMs Scenarios Covered
+## 🛡️ Standard Security Frameworks Mapped (The Triad)
 
 * **LLM01: Prompt Injection** — Direct jailbreaks and indirect RAG poisoning.
 * **LLM02: Sensitive Information Disclosure** — Secret token and system prompt exfiltration.
 * **LLM06: Excessive Agency & Tool Abuse** — Unauthorized tool execution (`send_email`, `search_database`).
 * **LLM08: Vector & Embedding Weaknesses** — PDF injection targeting FAISS vectors.
+Argus AI maps every discovered scenario, generated attack prompt, and analyzed finding across three industry standards:
+
+1. **OWASP Top 10 for LLM Applications (2025)**:
+   - `LLM01`: Direct & Indirect Prompt Injection
+   - `LLM02`: Insecure Output Handling
+   - `LLM04`: Data and Model Poisoning (RAG vector store poisoning)
+   - `LLM06`: Sensitive Information Disclosure (database & credential extraction)
+   - `LLM07`: System Prompt Leakage (internal instruction harvesting)
+   - `LLM08`: Excessive Agency (unauthorized tool execution & parameter tampering)
+
+2. **MITRE ATLAS (Adversarial Threat Landscape for AI Systems)**:
+   - `AML.T0051.000`: Direct Prompt Injection
+   - `AML.T0051.001`: Indirect Prompt Injection (via RAG document retrieval)
+   - `AML.T0054`: LLM Jailbreak (DAN, AIM, Opposite Mode overrides)
+   - `AML.T0053`: LLM Plugin Compromise / Tool Abuse (`send_email`, `search_database`)
+   - `AML.T0055`: System Prompt & Model Extraction
+   - `AML.T0048`: Exfiltration via AI API
+
+3. **NIST AI Risk Management Framework (AI RMF 1.0)**:
+   - `MEASURE 2.6`: Security, Resilience & Safety
+   - `MEASURE 2.7`: Data Integrity & Knowledge Base Poisoning
+   - `MEASURE 2.5`: Privacy & Confidentiality Controls
+   - `MANAGE 2.4`: Third-Party & Autonomous Tool Integration Risk
+   - `GOVERN 1.2`: Transparency, System Rules & Model Disclosure
+
+---
+
+## 📚 Standard Benchmark Corpora (Wordlists & Payloads)
+
+Instead of only static synthetic templates, Argus AI ships with curated benchmark datasets in `attack-engine/knowledge/corpora/`:
+- **`jailbreaks.json`**: HarmBench & JailbreakBench curated prompts (DAN, AIM, inverse constraint, developer diagnostics).
+- **`indirect_rag_injections.json`**: BIPIA and PayloadsAllTheThings context-injection payloads targeting RAG vector stores.
+- **`tool_abuse.json`**: Parameter coercion and unverified side-effect execution payloads.
+
+---
+
+## 🧪 Running Automated Tests (63/63 Tests Passing)
+
+To run the complete automated test suite across all modules:
+
+```bash
+# 1. Attack Engine Tests (44 tests)
+cd attack-engine && ./venv/bin/pytest tests/
+
+# 2. Backend Gateway Tests (9 tests)
+cd ../backend && ./venv/bin/pytest app/tests/
+
+# 3. Digital Twin Graph Tests (10 tests)
+cd ../digital-twin && PYTHONPATH=. ../attack-engine/venv/bin/pytest tests/
+
+# 4. Frontend Production Build Check
+cd ../frontend && npm run build
+```

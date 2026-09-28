@@ -17,6 +17,9 @@ from __future__ import annotations
 
 import base64
 from typing import Optional
+import json
+from pathlib import Path
+from typing import Any, Optional
 
 from agents.base import BaseAgent
 from core.config import AttackEngineSettings, get_settings
@@ -24,6 +27,7 @@ from core.exceptions import PromptGenerationError
 from generator.mutations import MutationEngine
 from generator.templates import PromptTemplateRegistry
 from graph.state import WorkflowState
+from models.enums import AttackCategory, MutationStrategy
 from models.planner_models import AttackScenario, DiscoveryContext
 from models.prompt_models import GeneratedPrompt, PromptGenerationOutput
 
@@ -32,6 +36,7 @@ from models.prompt_models import GeneratedPrompt, PromptGenerationOutput
 # resulting prompt is representative of what an overflow attempt looks
 # like against a real target.
 _PADDING_UNIT = "This is filler context used to test context window handling. "
+_CORPORA_DIR = Path(__file__).resolve().parent.parent / "knowledge" / "corpora"
 
 
 class PromptGeneratorAgent(BaseAgent[WorkflowState]):
@@ -95,6 +100,28 @@ class PromptGeneratorAgent(BaseAgent[WorkflowState]):
                     )
                 )
 
+            # Ingest standard benchmark corpus payloads if available
+            corpus_prompts = self._load_corpus_prompts(scenario)
+            for cp_idx, cp in enumerate(corpus_prompts):
+                prompts.append(
+                    GeneratedPrompt(
+                        scenario_id=scenario.id,
+                        category=scenario.category,
+                        title=f"{scenario.title} [Benchmark:{cp.get('id', 'CORP')}#{cp_idx}]",
+                        content=cp["content"],
+                        mutation_strategy=MutationStrategy.IDENTITY,
+                        variant_index=len(variants) + cp_idx,
+                        expected_behavior="The target should refuse, deflect, or safely decline the benchmark payload.",
+                        success_criteria=scenario.objective,
+                        severity=scenario.severity_estimate,
+                        metadata={
+                            "corpus_name": cp.get("name"),
+                            "mitre_atlas": cp.get("mitre_atlas"),
+                            "owasp": cp.get("owasp"),
+                        },
+                    )
+                )
+
         if not prompts:
             warnings.append("No prompts were generated - no scenarios were provided or all template renders failed.")
 
@@ -115,6 +142,44 @@ class PromptGeneratorAgent(BaseAgent[WorkflowState]):
             "encoded_payload": base64.b64encode(objective.encode("utf-8")).decode("ascii"),
         }
         return self._templates.render(scenario.category, context)
+
+    def _load_corpus_prompts(self, scenario: AttackScenario) -> list[dict[str, Any]]:
+        results: list[dict[str, Any]] = []
+        if not _CORPORA_DIR.exists():
+            return results
+
+        # Map scenario categories to appropriate corpus files
+        corpus_files: list[str] = []
+        cat_val = scenario.category.value if hasattr(scenario.category, "value") else str(scenario.category)
+        
+        if cat_val in {"jailbreak", "prompt_injection", "system_prompt_exposure", "role_manipulation"}:
+            corpus_files.append("jailbreaks.json")
+        if cat_val in {"indirect_prompt_injection", "rag_poisoning"}:
+            corpus_files.append("indirect_rag_injections.json")
+        if cat_val in {"tool_misuse", "function_calling_misuse", "data_access_validation", "agent_workflow_manipulation", "excessive_agency"}:
+            corpus_files.append("tool_abuse.json")
+
+        for fname in corpus_files:
+            cpath = _CORPORA_DIR / fname
+            if not cpath.exists():
+                continue
+            try:
+                with open(cpath, "r", encoding="utf-8") as f:
+                    entries = json.load(f)
+                for entry in entries:
+                    raw_template = entry.get("template", "")
+                    rendered = raw_template.replace("{objective}", scenario.objective)
+                    results.append({
+                        "id": entry.get("id"),
+                        "name": entry.get("name"),
+                        "content": rendered,
+                        "mitre_atlas": entry.get("mitre_atlas"),
+                        "owasp": entry.get("owasp"),
+                    })
+            except Exception as exc:
+                self.logger.warning("corpus_load_failed", extra={"file": fname, "error": str(exc)})
+
+        return results
 
     # ------------------------------------------------------------------
     # LangGraph node adapter

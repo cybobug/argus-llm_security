@@ -18,6 +18,14 @@ from typing import Optional
 from pydantic import BaseModel, Field
 
 from models.enums import AttackCategory, ComponentType, OwaspLlmCategory, Severity
+from models.enums import (
+    AttackCategory,
+    ComponentType,
+    MitreAtlasCategory,
+    NistAiRmfCategory,
+    OwaspLlmCategory,
+    Severity,
+)
 from models.graph_models import GraphNode
 
 
@@ -48,6 +56,8 @@ class AttackScenario(BaseModel):
     title: str
     category: AttackCategory
     owasp_category: OwaspLlmCategory
+    mitre_atlas_category: Optional[MitreAtlasCategory] = None
+    nist_category: Optional[NistAiRmfCategory] = None
     objective: str
     rationale: str
     target_path: AttackPath

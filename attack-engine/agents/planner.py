@@ -140,6 +140,8 @@ class PlannerAgent(BaseAgent[WorkflowState]):
                         title=f"{rule.name}: {sink.name}",
                         category=rule.category,
                         owasp_category=rule.owasp_category,
+                        mitre_atlas_category=rule.mitre_atlas_category,
+                        nist_category=rule.nist_category,
                         objective=objective,
                         rationale=rationale,
                         target_path=attack_path,

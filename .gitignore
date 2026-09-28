@@ -38,3 +38,8 @@ venv/
 *.db
 *.sqlite
 *.sqlite3
+
+# Generated reports & artifacts
+reports/
+*/reports/
+*.pdf

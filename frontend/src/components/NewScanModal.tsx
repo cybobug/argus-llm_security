@@ -7,16 +7,35 @@ interface NewScanModalProps {
 }
 
 export const NewScanModal: React.FC<NewScanModalProps> = ({ isOpen, onClose }) => {
-  const [targetUrl, setTargetUrl] = useState('http://localhost:8000/chat');
-  const [targetModel, setTargetModel] = useState('GPT-4o (Chatbot API)');
+  const [targetUrl, setTargetUrl] = useState('http://localhost:7003/chat');
+  const [targetModel, setTargetModel] = useState('Gemini 3.6 Flash (LangChain Enterprise RAG)');
   const [selectedAttacks, setSelectedAttacks] = useState<string[]>([
     'prompt-injection', 'rag-poisoning', 'tool-abuse', 'jailbreak'
   ]);
   const [isScanning, setIsScanning] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [activeStepIndex, setActiveStepIndex] = useState(0);
   const [scanComplete, setScanComplete] = useState(false);
 
   if (!isOpen) return null;
+
+  const scanSteps = [
+    { title: 'Target Discovery & API Handshake', desc: 'Validating LLM endpoint and inspecting schemas' },
+    { title: 'Digital Twin Graph Ingestion', desc: 'Mapping components, databases, and tool vectors' },
+    { title: 'Autonomous AI Red Teaming', desc: 'Executing OWASP LLM01, LLM03, LLM08 attack suites' },
+    { title: 'Exploit Attack Path Synthesis', desc: 'Traversing graph for critical sink reachability' },
+    { title: 'Risk Score & Posture Assessment', desc: 'Synthesizing evidence and generating remediation plan' }
+  ];
+
+  const liveLogs = [
+    'Handshake established with http://localhost:7003/chat (HTTP 200)',
+    'Identified Gemini 1.5 Flash agent architecture with FAISS vector store',
+    'Generating adversarial prompt injection variations with LangGraph evaluator...',
+    'Payload [OWASP-LLM01-V3] triggered system instruction leakage via PDF attachment',
+    'Tracing path: Attacker PDF ➔ Vector Embeddings ➔ LLM ➔ send_email()',
+    'Synthesizing Cypher attack path in Neo4j database...',
+    'Posture analysis complete: 2 Critical, 4 High vulnerabilities identified.'
+  ];
 
   const toggleAttack = (id: string) => {
     if (selectedAttacks.includes(id)) {
@@ -28,24 +47,31 @@ export const NewScanModal: React.FC<NewScanModalProps> = ({ isOpen, onClose }) =
 
   const handleStartScan = () => {
     setIsScanning(true);
-    setProgress(15);
+    setProgress(10);
+    setActiveStepIndex(0);
     
     const interval = setInterval(() => {
       setProgress((prev) => {
-        if (prev >= 100) {
+        const next = prev + 15;
+        if (next >= 100) {
           clearInterval(interval);
           setIsScanning(false);
           setScanComplete(true);
+          setActiveStepIndex(4);
           return 100;
         }
-        return prev + 25;
+        if (next > 75) setActiveStepIndex(3);
+        else if (next > 50) setActiveStepIndex(2);
+        else if (next > 25) setActiveStepIndex(1);
+        return next;
       });
-    }, 600);
+    }, 800);
   };
 
   const handleReset = () => {
     setIsScanning(false);
     setProgress(0);
+    setActiveStepIndex(0);
     setScanComplete(false);
     onClose();
   };
@@ -192,14 +218,18 @@ export const NewScanModal: React.FC<NewScanModalProps> = ({ isOpen, onClose }) =
           )}
 
           {isScanning && (
-            <div style={{ padding: '30px 10px', textAlign: 'center' }}>
-              <Loader2 size={44} color="var(--accent-red)" className="animate-spin" style={{ margin: '0 auto 20px' }} />
-              <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text-bright)' }}>
-                ARGUS Autonomous Red Team Engine Running...
-              </h3>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '6px' }}>
-                Executing automated OWASP Top 10 attack payloads against {targetUrl}
-              </p>
+            <div style={{ padding: '10px 4px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '18px' }}>
+                <Loader2 size={32} color="var(--accent-red)" className="animate-spin" style={{ flexShrink: 0 }} />
+                <div>
+                  <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-bright)' }}>
+                    ARGUS Autonomous Red Team Engine Running...
+                  </h3>
+                  <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                    Target: <span style={{ color: 'var(--accent-blue-glow)', fontFamily: 'var(--font-mono)' }}>{targetUrl}</span>
+                  </p>
+                </div>
+              </div>
 
               {/* Progress bar */}
               <div style={{
@@ -207,8 +237,8 @@ export const NewScanModal: React.FC<NewScanModalProps> = ({ isOpen, onClose }) =
                 height: '8px',
                 backgroundColor: 'rgba(255, 255, 255, 0.08)',
                 borderRadius: '9999px',
-                marginTop: '24px',
-                overflow: 'hidden'
+                overflow: 'hidden',
+                marginBottom: '16px'
               }}>
                 <div style={{
                   width: `${progress}%`,
@@ -218,9 +248,79 @@ export const NewScanModal: React.FC<NewScanModalProps> = ({ isOpen, onClose }) =
                   transition: 'width 0.4s ease'
                 }} />
               </div>
-              <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', marginTop: '8px', display: 'block', fontFamily: 'var(--font-mono)' }}>
-                {progress}% Completed
-              </span>
+
+              {/* 5-Step Pipeline Indicator */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
+                {scanSteps.map((step, idx) => {
+                  const isDone = activeStepIndex > idx;
+                  const isCurrent = activeStepIndex === idx;
+
+                  return (
+                    <div 
+                      key={idx}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '10px',
+                        padding: '8px 12px',
+                        borderRadius: 'var(--radius-sm)',
+                        backgroundColor: isCurrent ? 'var(--accent-red-bg)' : isDone ? 'rgba(16, 185, 129, 0.05)' : 'var(--bg-input)',
+                        border: isCurrent ? '1px solid var(--accent-red)' : isDone ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid var(--border-subtle)'
+                      }}
+                    >
+                      <div style={{
+                        width: '18px',
+                        height: '18px',
+                        borderRadius: '50%',
+                        backgroundColor: isDone ? 'var(--accent-green)' : isCurrent ? 'var(--accent-red)' : 'rgba(255, 255, 255, 0.1)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '0.65rem',
+                        fontWeight: 800,
+                        color: 'white',
+                        flexShrink: 0
+                      }}>
+                        {isDone ? '✓' : idx + 1}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: '0.8rem', fontWeight: 600, color: isCurrent ? 'var(--text-bright)' : isDone ? 'var(--accent-green)' : 'var(--text-muted)' }}>
+                          {step.title}
+                        </div>
+                        <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>
+                          {step.desc}
+                        </div>
+                      </div>
+                      {isCurrent && (
+                        <span style={{ fontSize: '0.68rem', color: 'var(--accent-red-glow)', fontFamily: 'var(--font-mono)', fontWeight: 700 }}>
+                          ACTIVE
+                        </span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Live Terminal Telemetry Box */}
+              <div style={{
+                backgroundColor: '#05070B',
+                border: '1px solid var(--border-subtle)',
+                borderRadius: 'var(--radius-md)',
+                padding: '10px 12px',
+                fontFamily: 'var(--font-mono)',
+                fontSize: '0.68rem',
+                color: 'var(--accent-blue-glow)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '4px',
+                maxHeight: '80px',
+                overflow: 'hidden'
+              }}>
+                <div style={{ color: 'var(--text-muted)', fontSize: '0.62rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  // LIVE LANGGRAPH RED-TEAM TELEMETRY
+                </div>
+                <div>{`> ${liveLogs[activeStepIndex % liveLogs.length]}`}</div>
+              </div>
             </div>
           )}
 

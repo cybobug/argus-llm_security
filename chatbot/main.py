@@ -9,9 +9,9 @@ from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 
-from rag_agent import rag_manager, process_chat_message
+from rag_agent import rag_manager, process_chat_message, evaluate_target_response
 
 app = FastAPI(
     title="Argus Target Practice Dummy AI",
@@ -31,13 +31,27 @@ app.add_middleware(
 class ChatRequest(BaseModel):
     message: str
     session_id: str = "session-001"
+    defense_level: int = 0
+
+class SecurityAnalysisResponse(BaseModel):
+    success: bool
+    verification_status: str  # "VERIFIED" | "BLOCKED" | "UNVERIFIED"
+    risk: str                 # "CRITICAL" | "HIGH" | "MEDIUM" | "LOW"
+    confidence: int
+    attack_type: str
+    canary_detected: bool
+    indicators: List[str]
+    attack_path: List[str]
+    observation: str
 
 # Response Models
-# We include both 'reply' and 'response' to satisfy both the browser UI and Argus backend contract!
 class ChatResponse(BaseModel):
     reply: str
     response: str
     session_id: str = "session-001"
+    defense_level: int = 0
+    blocked_by_guardrail: bool = False
+    analysis: Optional[SecurityAnalysisResponse] = None
 
 class DocumentInfo(BaseModel):
     filename: str
@@ -346,14 +360,63 @@ def read_root():
 def health_endpoint():
     return {"status": "ok", "service": "target_chatbot"}
 
+CURRENT_DEFENSE_LEVEL = 0
+
+DEFENSE_MODES = {
+    0: "Guardrails: Disabled (Vulnerable Target Sandbox)",
+    1: "Guardrails: Partial (Rule-based Boundary Filter)",
+    2: "Guardrails: Hardened (LlamaGuard / NeMo Guardrails)"
+}
+
+@app.get("/defense")
+def get_defense_status():
+    return {
+        "defense_level": CURRENT_DEFENSE_LEVEL,
+        "mode": DEFENSE_MODES.get(CURRENT_DEFENSE_LEVEL, DEFENSE_MODES[2])
+    }
+
+@app.post("/defense/{level}")
+def set_defense_status(level: int):
+    global CURRENT_DEFENSE_LEVEL
+    CURRENT_DEFENSE_LEVEL = max(0, min(level, 2))
+    return {
+        "status": "success",
+        "defense_level": CURRENT_DEFENSE_LEVEL,
+        "mode": DEFENSE_MODES.get(CURRENT_DEFENSE_LEVEL, DEFENSE_MODES[2])
+    }
+
 @app.post("/chat", response_model=ChatResponse)
 def chat_endpoint(request: ChatRequest):
     if not request.message:
         raise HTTPException(status_code=400, detail="Message cannot be empty.")
-    reply = process_chat_message(request.message)
-    return ChatResponse(reply=reply, response=reply, session_id=request.session_id)
+    
+    # Priority to request-level defense_level, fallback to global CURRENT_DEFENSE_LEVEL
+    effective_defense = request.defense_level if request.defense_level is not None else CURRENT_DEFENSE_LEVEL
+    reply, blocked = process_chat_message(request.message, defense_level=effective_defense)
+    analysis_dict = evaluate_target_response(request.message, reply, defense_level=effective_defense, blocked=blocked)
+    analysis_obj = SecurityAnalysisResponse(**analysis_dict)
+    return ChatResponse(
+        reply=reply, 
+        response=reply, 
+        session_id=request.session_id,
+        defense_level=effective_defense,
+        blocked_by_guardrail=blocked,
+        analysis=analysis_obj
+    )
+
+class EvaluateRequest(BaseModel):
+    user_input: str
+    response_text: str
+    defense_level: int = 0
+    blocked: bool = False
+
+@app.post("/evaluate", response_model=SecurityAnalysisResponse)
+def evaluate_endpoint(request: EvaluateRequest):
+    analysis_dict = evaluate_target_response(request.user_input, request.response_text, defense_level=request.defense_level, blocked=request.blocked)
+    return SecurityAnalysisResponse(**analysis_dict)
 
 @app.post("/upload")
+@app.post("/upload-pdf")
 async def upload_document_endpoint(file: UploadFile = File(...)):
     if not file.filename.endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Only PDF files are supported.")

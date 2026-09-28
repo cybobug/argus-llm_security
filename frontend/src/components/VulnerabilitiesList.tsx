@@ -4,15 +4,15 @@ import { X } from 'lucide-react';
 interface VulnItem {
   name: string;
   score: number;
+  color?: string;
 }
 
 export const VulnerabilitiesList: React.FC = () => {
   const vulns: VulnItem[] = [
-    { name: 'Prompt Injection', score: 9.8 },
-    { name: 'RAG Poisoning', score: 8.7 },
-    { name: 'Tool Abuse', score: 7.2 },
-    { name: 'Data Leakage', score: 6.5 },
-    { name: 'Excessive Agency', score: 4.1 }
+    { name: 'Prompt Injection', score: 9.8, color: '#EF4444' },
+    { name: 'RAG Poisoning', score: 8.4, color: '#F59E0B' },
+    { name: 'Tool Abuse', score: 7.1, color: '#3B82F6' },
+    { name: 'Jailbreak Attempts', score: 6.9, color: '#38BDF8' }
   ];
 
   return (
@@ -40,14 +40,14 @@ export const VulnerabilitiesList: React.FC = () => {
                 fontSize: '0.8rem',
                 marginBottom: '6px'
               }}>
-                <span style={{ color: 'var(--text-bright)', fontWeight: 500 }}>
+                <span style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>
                   {item.name}
                 </span>
                 <span style={{
                   fontFamily: 'var(--font-mono)',
                   fontWeight: 700,
                   fontSize: '0.78rem',
-                  color: item.score > 8 ? 'var(--accent-red-glow)' : 'var(--text-secondary)'
+                  color: item.color
                 }}>
                   {item.score.toFixed(1)}<span style={{ color: 'var(--text-muted)' }}>/10</span>
                 </span>
@@ -56,7 +56,7 @@ export const VulnerabilitiesList: React.FC = () => {
               {/* Progress Bar Container */}
               <div style={{
                 width: '100%',
-                height: '6px',
+                height: '7px',
                 backgroundColor: 'rgba(255, 255, 255, 0.06)',
                 borderRadius: '9999px',
                 overflow: 'hidden'
@@ -64,13 +64,9 @@ export const VulnerabilitiesList: React.FC = () => {
                 <div style={{
                   width: `${percent}%`,
                   height: '100%',
-                  background: item.score > 8 
-                    ? 'linear-gradient(90deg, #DC2626 0%, #EF4444 100%)' 
-                    : item.score > 6 
-                    ? 'linear-gradient(90deg, #D97706 0%, #F59E0B 100%)' 
-                    : 'linear-gradient(90deg, #2563EB 0%, #3B82F6 100%)',
+                  backgroundColor: item.color,
                   borderRadius: '9999px',
-                  boxShadow: item.score > 8 ? '0 0 8px rgba(239, 68, 68, 0.6)' : 'none',
+                  boxShadow: `0 0 8px ${item.color}80`,
                   transition: 'width 1s ease-in-out'
                 }} />
               </div>

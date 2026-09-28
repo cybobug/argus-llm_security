@@ -8,6 +8,7 @@ interface MetricCardProps {
   isIncrease: boolean;
   trendColor: 'red' | 'blue' | 'green';
   sparklineData: number[];
+  showViewAll?: boolean;
 }
 
 export const MetricCard: React.FC<MetricCardProps> = ({
@@ -16,7 +17,8 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   changeText,
   isIncrease,
   trendColor,
-  sparklineData
+  sparklineData,
+  showViewAll = true
 }) => {
   const getColorHex = () => {
     switch (trendColor) {
@@ -46,15 +48,22 @@ export const MetricCard: React.FC<MetricCardProps> = ({
   return (
     <div className="argus-card col-span-3" style={{ height: '220px', padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
       <div>
-        <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
-          {title}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>
+            <span>{title}</span>
+            <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem', cursor: 'pointer' }}>ⓘ</span>
+          </div>
+          {showViewAll && (
+            <span style={{ fontSize: '0.74rem', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '2px' }}>
+              View All →
+            </span>
+          )}
         </div>
         <div style={{
           fontSize: '2.4rem',
           fontWeight: 800,
           fontFamily: 'var(--font-heading)',
           color: 'var(--text-bright)',
-          marginTop: '8px',
           lineHeight: 1
         }}>
           {value}

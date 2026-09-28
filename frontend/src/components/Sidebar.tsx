@@ -1,6 +1,5 @@
 import React from 'react';
 import { 
-  ShieldAlert, 
   Radar, 
   Network, 
   Bug, 
@@ -9,8 +8,9 @@ import {
   FileText, 
   Blocks, 
   Settings,
-  ChevronDown,
-  Activity
+  Activity,
+  Bot,
+  ChevronDown
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -19,16 +19,23 @@ interface SidebarProps {
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
-  const navItems = [
-    { id: 'overview', label: 'Overview', icon: Activity },
-    { id: 'scans', label: 'Scans', icon: Radar },
-    { id: 'digital-twin', label: 'Digital Twin', icon: Network },
-    { id: 'vulnerabilities', label: 'Vulnerabilities', icon: Bug },
-    { id: 'attack-paths', label: 'Attack Paths', icon: GitPullRequest },
+  const coreNav = [
+    { id: 'overview', label: 'SOC Dashboard', icon: Activity },
+    { id: 'target-chatbot', label: 'Target Chatbot', icon: Bot, badge: 'Live RAG' },
+    { id: 'scans', label: 'Security Assessments', icon: Radar },
+  ];
+
+  const graphNav = [
+    { id: 'digital-twin', label: 'Digital Twin Graph', icon: Network },
+    { id: 'vulnerabilities', label: 'Vulnerability Matrix', icon: Bug, badge: '6 Findings' },
+    { id: 'attack-paths', label: 'Exploit Attack Paths', icon: GitPullRequest },
+  ];
+
+  const secondaryNav = [
     { id: 'threat-intel', label: 'Threat Intelligence', icon: BrainCircuit },
-    { id: 'reports', label: 'Reports', icon: FileText },
-    { id: 'integrations', label: 'Integrations', icon: Blocks },
-    { id: 'settings', label: 'Settings', icon: Settings },
+    { id: 'reports', label: 'Executive Reports', icon: FileText },
+    { id: 'integrations', label: 'Integrations & SIEM', icon: Blocks },
+    { id: 'settings', label: 'Platform Settings', icon: Settings },
   ];
 
   return (
@@ -40,33 +47,34 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => 
       display: 'flex',
       flexDirection: 'column',
       flexShrink: 0,
-      userSelect: 'none'
+      userSelect: 'none',
+      transition: 'background-color 0.3s ease'
     }}>
       {/* Brand Header */}
       <div style={{
-        padding: '24px 20px 20px',
+        padding: '22px 20px 18px',
         display: 'flex',
         alignItems: 'center',
         gap: '12px',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.05)'
+        borderBottom: '1px solid var(--border-subtle)'
       }}>
         <img 
           src="/logo.png" 
           alt="ARGUS Logo" 
           style={{
-            width: '38px',
-            height: '38px',
+            width: '36px',
+            height: '36px',
             objectFit: 'contain',
-            filter: 'drop-shadow(0 0 8px rgba(239, 68, 68, 0.5))'
+            filter: 'drop-shadow(0 0 8px rgba(239, 68, 68, 0.45))'
           }}
         />
         <div>
           <h1 style={{
             fontFamily: 'var(--font-heading)',
-            fontSize: '1.45rem',
+            fontSize: '1.35rem',
             fontWeight: 800,
             letterSpacing: '0.08em',
-            color: '#FFFFFF',
+            color: 'var(--text-bright)',
             lineHeight: 1
           }}>
             ARGUS
@@ -83,104 +91,243 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => 
         </div>
       </div>
 
-      {/* Navigation Links */}
-      <nav style={{
-        flex: 1,
-        padding: '16px 12px',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '4px',
-        overflowY: 'auto'
-      }}>
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = activeTab === item.id;
-          return (
-            <button
-              key={item.id}
-              onClick={() => setActiveTab(item.id)}
-              style={{
-                width: '100%',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '14px',
-                padding: '10px 14px',
-                borderRadius: 'var(--radius-md)',
-                border: 'none',
-                backgroundColor: isActive ? 'var(--accent-red-bg)' : 'transparent',
-                color: isActive ? 'var(--accent-red-glow)' : 'var(--text-secondary)',
-                fontWeight: isActive ? 600 : 400,
-                fontSize: '0.9rem',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-                borderLeft: isActive ? '3px solid var(--accent-red)' : '3px solid transparent'
-              }}
-              onMouseEnter={(e) => {
-                if (!isActive) {
-                  e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.03)';
-                  e.currentTarget.style.color = 'var(--text-primary)';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!isActive) {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                  e.currentTarget.style.color = 'var(--text-secondary)';
-                }
-              }}
-            >
-              <Icon size={18} color={isActive ? 'var(--accent-red)' : 'currentColor'} />
-              <span>{item.label}</span>
-            </button>
-          );
-        })}
-      </nav>
+      {/* Navigation Sections */}
+      <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', padding: '12px 0' }}>
+        
+        {/* Section 1: Core Operations */}
+        <div style={{
+          padding: '8px 20px 6px',
+          fontSize: '0.66rem',
+          fontWeight: 800,
+          letterSpacing: '0.08em',
+          color: 'var(--text-muted)',
+          textTransform: 'uppercase'
+        }}>
+          Operations
+        </div>
+        <nav style={{ padding: '0 12px', display: 'flex', flexDirection: 'column', gap: '3px' }}>
+          {coreNav.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeTab === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => setActiveTab(item.id)}
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '9px 12px',
+                  borderRadius: 'var(--radius-md)',
+                  border: 'none',
+                  backgroundColor: isActive ? 'var(--accent-red-bg)' : 'transparent',
+                  color: isActive ? 'var(--accent-red-glow)' : 'var(--text-secondary)',
+                  fontWeight: isActive ? 700 : 500,
+                  fontSize: '0.84rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                  borderLeft: isActive ? '3px solid var(--accent-red)' : '3px solid transparent'
+                }}
+                onMouseEnter={(e) => {
+                  if (!isActive) {
+                    e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.03)';
+                    e.currentTarget.style.color = 'var(--text-primary)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isActive) {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                    e.currentTarget.style.color = 'var(--text-secondary)';
+                  }
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <Icon size={16} color={isActive ? 'var(--accent-red)' : 'var(--text-muted)'} />
+                  <span>{item.label}</span>
+                </div>
+                {item.badge && (
+                  <span style={{
+                    fontSize: '0.64rem',
+                    padding: '2px 7px',
+                    borderRadius: '10px',
+                    backgroundColor: 'rgba(56, 189, 248, 0.15)',
+                    color: 'var(--accent-blue-glow)',
+                    fontWeight: 700,
+                    border: '1px solid rgba(56, 189, 248, 0.3)'
+                  }}>
+                    {item.badge}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </nav>
 
-      {/* User Footer Profile */}
+        {/* Section 2: Attack Surface & Knowledge Graph */}
+        <div style={{
+          padding: '16px 20px 6px',
+          fontSize: '0.66rem',
+          fontWeight: 800,
+          letterSpacing: '0.08em',
+          color: 'var(--text-muted)',
+          textTransform: 'uppercase'
+        }}>
+          Attack Surface
+        </div>
+        <nav style={{ padding: '0 12px', display: 'flex', flexDirection: 'column', gap: '3px' }}>
+          {graphNav.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeTab === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => setActiveTab(item.id)}
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '9px 12px',
+                  borderRadius: 'var(--radius-md)',
+                  border: 'none',
+                  backgroundColor: isActive ? 'var(--accent-red-bg)' : 'transparent',
+                  color: isActive ? 'var(--accent-red-glow)' : 'var(--text-secondary)',
+                  fontWeight: isActive ? 700 : 500,
+                  fontSize: '0.84rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                  borderLeft: isActive ? '3px solid var(--accent-red)' : '3px solid transparent'
+                }}
+                onMouseEnter={(e) => {
+                  if (!isActive) {
+                    e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.03)';
+                    e.currentTarget.style.color = 'var(--text-primary)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isActive) {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                    e.currentTarget.style.color = 'var(--text-secondary)';
+                  }
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <Icon size={16} color={isActive ? 'var(--accent-red)' : 'var(--text-muted)'} />
+                  <span>{item.label}</span>
+                </div>
+                {item.badge && (
+                  <span style={{
+                    fontSize: '0.64rem',
+                    padding: '2px 7px',
+                    borderRadius: '10px',
+                    backgroundColor: 'rgba(239, 68, 68, 0.15)',
+                    color: 'var(--accent-red)',
+                    fontWeight: 700,
+                    border: '1px solid rgba(239, 68, 68, 0.3)'
+                  }}>
+                    {item.badge}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </nav>
+
+        {/* Section 3: Intelligence & Management */}
+        <div style={{
+          padding: '16px 20px 6px',
+          fontSize: '0.66rem',
+          fontWeight: 800,
+          letterSpacing: '0.08em',
+          color: 'var(--text-muted)',
+          textTransform: 'uppercase'
+        }}>
+          Intelligence & Audits
+        </div>
+        <nav style={{ padding: '0 12px', display: 'flex', flexDirection: 'column', gap: '3px' }}>
+          {secondaryNav.map((item) => {
+            const Icon = item.icon;
+            const isActive = activeTab === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => setActiveTab(item.id)}
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  padding: '9px 12px',
+                  borderRadius: 'var(--radius-md)',
+                  border: 'none',
+                  backgroundColor: isActive ? 'var(--accent-red-bg)' : 'transparent',
+                  color: isActive ? 'var(--accent-red-glow)' : 'var(--text-secondary)',
+                  fontWeight: isActive ? 700 : 500,
+                  fontSize: '0.84rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                  borderLeft: isActive ? '3px solid var(--accent-red)' : '3px solid transparent'
+                }}
+                onMouseEnter={(e) => {
+                  if (!isActive) {
+                    e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.03)';
+                    e.currentTarget.style.color = 'var(--text-primary)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isActive) {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                    e.currentTarget.style.color = 'var(--text-secondary)';
+                  }
+                }}
+              >
+                <Icon size={16} color={isActive ? 'var(--accent-red)' : 'var(--text-muted)'} />
+                <span>{item.label}</span>
+              </button>
+            );
+          })}
+        </nav>
+
+      </div>
+
+      {/* Bottom Status Capsule */}
       <div style={{
-        padding: '16px 16px',
+        padding: '14px 18px',
         borderTop: '1px solid var(--border-subtle)',
+        backgroundColor: 'var(--bg-card)',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-between',
-        backgroundColor: 'rgba(0,0,0,0.2)'
+        justifyContent: 'space-between'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <div style={{
-            position: 'relative',
-            width: '36px',
-            height: '36px',
+            width: '8px',
+            height: '8px',
             borderRadius: '50%',
-            backgroundColor: '#1E2433',
-            border: '1px solid var(--border-subtle)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontWeight: 700,
-            color: 'var(--text-bright)',
-            fontSize: '0.85rem'
-          }}>
-            ST
-            <span style={{
-              position: 'absolute',
-              bottom: 0,
-              right: 0,
-              width: '10px',
-              height: '10px',
-              borderRadius: '50%',
-              backgroundColor: 'var(--accent-green)',
-              border: '2px solid var(--bg-sidebar)'
-            }} />
-          </div>
-          <div>
-            <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-bright)' }}>
-              SOC Team
-            </div>
-            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-              Administrator
-            </div>
+            backgroundColor: 'var(--accent-green)',
+            boxShadow: '0 0 8px rgba(16, 185, 129, 0.8)'
+          }} />
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <span style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--text-bright)', lineHeight: 1.1 }}>
+              SOC System Live
+            </span>
+            <span style={{ fontSize: '0.64rem', color: 'var(--text-muted)' }}>
+              Port 7003 • 8000
+            </span>
           </div>
         </div>
-        <ChevronDown size={16} color="var(--text-muted)" style={{ cursor: 'pointer' }} />
+        <span style={{
+          fontSize: '0.68rem',
+          color: 'var(--text-muted)',
+          fontFamily: 'var(--font-mono)',
+          padding: '2px 6px',
+          borderRadius: '4px',
+          backgroundColor: 'var(--bg-input)',
+          border: '1px solid var(--border-subtle)'
+        }}>
+          v1.0.4
+        </span>
       </div>
     </aside>
   );

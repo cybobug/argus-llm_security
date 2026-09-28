@@ -10,6 +10,7 @@ from typing import Optional
 from pydantic import BaseModel, Field
 
 from models.enums import OwaspLlmCategory
+from models.enums import MitreAtlasCategory, NistAiRmfCategory, OwaspLlmCategory
 
 
 class DetectorResult(BaseModel):
@@ -32,6 +33,8 @@ class ResponseAnalysis(BaseModel):
     attack_success: bool
     confidence: float = Field(ge=0.0, le=1.0)
     violated_policy: Optional[OwaspLlmCategory] = None
+    mitre_atlas_category: Optional[MitreAtlasCategory] = None
+    nist_category: Optional[NistAiRmfCategory] = None
     evidence: list[str] = Field(default_factory=list)
     explanation: str
     detector_results: list[DetectorResult] = Field(default_factory=list)

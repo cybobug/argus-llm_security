@@ -46,6 +46,28 @@ class OwaspLlmCategory(str, Enum):
     LLM10_UNBOUNDED_CONSUMPTION = "LLM10:2025 Unbounded Consumption"
 
 
+class MitreAtlasCategory(str, Enum):
+    """MITRE ATLAS (Adversarial Threat Landscape for AI Systems) Techniques."""
+
+    DIRECT_INJECTION = "AML.T0051.000 (LLM Prompt Injection: Direct)"
+    INDIRECT_INJECTION = "AML.T0051.001 (LLM Prompt Injection: Indirect)"
+    LLM_JAILBREAK = "AML.T0054 (LLM Jailbreak)"
+    PLUGIN_COMPROMISE = "AML.T0053 (LLM Plugin Compromise / Tool Abuse)"
+    DATA_EXFILTRATION = "AML.T0048 (Exfiltration via AI API)"
+    DENIAL_OF_SERVICE = "AML.T0029 (LLM Denial of Service)"
+    SYSTEM_EXTRACTION = "AML.T0055 (System Prompt & Model Extraction)"
+
+
+class NistAiRmfCategory(str, Enum):
+    """NIST AI Risk Management Framework (AI RMF 1.0) Dimensions."""
+
+    MEASURE_SECURITY = "MEASURE 2.6: Security, Resilience & Safety"
+    MEASURE_INTEGRITY = "MEASURE 2.7: Data Integrity & Poisoning"
+    MEASURE_PRIVACY = "MEASURE 2.5: Privacy & Confidentiality"
+    MANAGE_THIRD_PARTY = "MANAGE 2.4: Third-Party & Tool Integration Risk"
+    GOVERN_TRANSPARENCY = "GOVERN 1.2: Transparency & Model Disclosure"
+
+
 class ComponentType(str, Enum):
     """Mirrors the Digital Twin graph's node labels (see
     digital-twin/graph/builder.py once implemented). The Planner consumes

@@ -39,6 +39,7 @@ class AttackResult:
     response: str
     score: float
     category: str
+    attack_success: bool = False
 
 
 # ── Mock Implementation ───────────────────────────────────────────────────────
@@ -85,6 +86,7 @@ async def _real_execute_attack(target_url: str, prompt: str) -> AttackResult:
             response=data.get("response", ""),
             score=float(data.get("score", 0.0)),
             category=data.get("category", "Unknown"),
+            attack_success=bool(data.get("attack_success", False)),
         )
 
 
