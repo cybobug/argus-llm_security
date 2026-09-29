@@ -258,7 +258,9 @@ export const DigitalTwinGraph: React.FC<DigitalTwinGraphProps> = ({ onNavigateTa
         <div style={{
           flex: 1,
           position: 'relative',
-          backgroundColor: 'rgba(7, 9, 12, 0.4)',
+          backgroundColor: 'var(--bg-app)',
+          backgroundImage: 'radial-gradient(var(--border-glass) 1px, transparent 1px)',
+          backgroundSize: '20px 20px',
           overflow: 'hidden',
           minHeight: 0
         }}>
@@ -272,13 +274,13 @@ export const DigitalTwinGraph: React.FC<DigitalTwinGraphProps> = ({ onNavigateTa
           >
             <defs>
               <radialGradient id="llm-center-glow" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stopColor="rgba(239, 68, 68, 0.4)" />
+                <stop offset="0%" stopColor="rgba(239, 68, 68, 0.35)" />
                 <stop offset="100%" stopColor="rgba(239, 68, 68, 0)" />
               </radialGradient>
             </defs>
 
             {/* Central Radial Glow on LLM */}
-            <circle cx="350" cy="140" r="72" fill="url(#llm-center-glow)" />
+            <circle cx="350" cy="140" r="75" fill="url(#llm-center-glow)" />
 
             {/* Connection Edges & Packets */}
             {links.map((link, idx) => {
@@ -294,13 +296,13 @@ export const DigitalTwinGraph: React.FC<DigitalTwinGraphProps> = ({ onNavigateTa
                     y1={p1.cy}
                     x2={p2.cx}
                     y2={p2.cy}
-                    stroke={link.isRisk ? '#EF4444' : '#64748B'}
-                    strokeWidth={link.isRisk ? 1.8 : 1.2}
+                    stroke={link.isRisk ? '#EF4444' : 'var(--text-muted)'}
+                    strokeWidth={link.isRisk ? 2.2 : 1.4}
                     strokeDasharray={link.isRisk ? '5,5' : 'none'}
-                    opacity={isSelectedRel ? 0.9 : 0.25}
+                    opacity={isSelectedRel ? (link.isRisk ? 0.95 : 0.6) : 0.18}
                   />
                   {link.isRisk && isSelectedRel && (
-                    <circle r="3" fill="#FF2E2E">
+                    <circle r="3.5" fill="#EF4444">
                       <animateMotion
                         path={pathD}
                         dur="3s"
@@ -322,20 +324,20 @@ export const DigitalTwinGraph: React.FC<DigitalTwinGraphProps> = ({ onNavigateTa
               const strokeColor = isCenter 
                 ? '#EF4444' 
                 : isSelected 
-                ? '#38BDF8' 
+                ? 'var(--accent-blue)' 
                 : isCritical 
                 ? '#EF4444' 
                 : isRisk 
                 ? '#F59E0B' 
-                : '#64748B';
+                : 'var(--border-glass)';
 
               const iconColor = isSelected 
-                ? '#38BDF8' 
+                ? 'var(--accent-blue)' 
                 : isCritical 
                 ? '#EF4444' 
                 : isRisk 
-                ? '#F59E0B' 
-                : '#94A3B8';
+                ? '#D97706' 
+                : 'var(--text-secondary)';
 
               const NodeIcon = node.icon;
 
@@ -350,12 +352,12 @@ export const DigitalTwinGraph: React.FC<DigitalTwinGraphProps> = ({ onNavigateTa
                     <circle 
                       cx={node.cx} 
                       cy={node.cy} 
-                      r={isCenter ? 36 : 28} 
+                      r={isCenter ? 37 : 29} 
                       fill="none" 
-                      stroke="#38BDF8" 
-                      strokeWidth="2" 
+                      stroke="var(--accent-blue)" 
+                      strokeWidth="2.5" 
                       strokeDasharray="4,4" 
-                      opacity="0.8" 
+                      opacity="0.9" 
                     />
                   )}
 
@@ -367,18 +369,18 @@ export const DigitalTwinGraph: React.FC<DigitalTwinGraphProps> = ({ onNavigateTa
                       width="56" 
                       height="56" 
                       rx="14" 
-                      fill="#161B26" 
+                      fill="var(--bg-card)" 
                       stroke={strokeColor} 
-                      strokeWidth="2.2" 
+                      strokeWidth="2.5" 
                     />
                   ) : (
                     <circle 
                       cx={node.cx} 
                       cy={node.cy} 
                       r="22" 
-                      fill="#11151F" 
+                      fill="var(--bg-card)" 
                       stroke={strokeColor} 
-                      strokeWidth="1.8" 
+                      strokeWidth="2" 
                     />
                   )}
 
@@ -392,7 +394,7 @@ export const DigitalTwinGraph: React.FC<DigitalTwinGraphProps> = ({ onNavigateTa
                   >
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%' }}>
                       {isCenter ? (
-                        <ShieldAlert size={26} color="#FF2E2E" />
+                        <ShieldAlert size={26} color="#EF4444" />
                       ) : (
                         <NodeIcon size={18} color={iconColor} />
                       )}
@@ -401,10 +403,10 @@ export const DigitalTwinGraph: React.FC<DigitalTwinGraphProps> = ({ onNavigateTa
 
                   {/* Label Pill Box */}
                   <foreignObject
-                    x={node.cx - 65}
+                    x={node.cx - 70}
                     y={node.cy + (isCenter ? 32 : 26)}
-                    width="130"
-                    height="24"
+                    width="140"
+                    height="28"
                     style={{ pointerEvents: 'none' }}
                   >
                     <div style={{
@@ -414,15 +416,15 @@ export const DigitalTwinGraph: React.FC<DigitalTwinGraphProps> = ({ onNavigateTa
                       width: '100%'
                     }}>
                       <span style={{
-                        fontSize: isCenter ? '0.76rem' : '0.68rem',
-                        fontWeight: isCenter ? 800 : 600,
-                        color: isSelected ? '#38BDF8' : isCenter ? '#FFFFFF' : 'var(--text-bright)',
-                        backgroundColor: 'rgba(11, 14, 20, 0.92)',
-                        padding: '1px 8px',
-                        borderRadius: '4px',
-                        border: isSelected ? '1px solid #38BDF8' : '1px solid rgba(255, 255, 255, 0.12)',
+                        fontSize: isCenter ? '0.78rem' : '0.70rem',
+                        fontWeight: isCenter ? 800 : 700,
+                        color: isSelected ? 'var(--accent-blue)' : isCenter ? 'var(--accent-red)' : 'var(--text-bright)',
+                        backgroundColor: 'var(--bg-card)',
+                        padding: '2px 9px',
+                        borderRadius: '6px',
+                        border: isSelected ? '1.5px solid var(--accent-blue)' : isCenter ? '1.5px solid #EF4444' : '1px solid var(--border-glass)',
                         whiteSpace: 'nowrap',
-                        boxShadow: '0 2px 6px rgba(0,0,0,0.5)'
+                        boxShadow: 'var(--shadow-card)'
                       }}>
                         {node.label}
                       </span>
@@ -439,65 +441,65 @@ export const DigitalTwinGraph: React.FC<DigitalTwinGraphProps> = ({ onNavigateTa
               position: 'absolute',
               top: '10px',
               right: '12px',
-              width: '260px',
-              backgroundColor: 'rgba(11, 14, 23, 0.96)',
+              width: '265px',
+              backgroundColor: 'var(--bg-card)',
               backdropFilter: 'blur(20px)',
               WebkitBackdropFilter: 'blur(20px)',
               border: '1px solid var(--border-glass)',
               borderRadius: 'var(--radius-md)',
-              boxShadow: '0 12px 36px rgba(0, 0, 0, 0.7)',
+              boxShadow: '0 12px 36px rgba(0, 0, 0, 0.15), var(--shadow-card)',
               zIndex: 30,
-              padding: '12px 14px',
+              padding: '14px',
               display: 'flex',
               flexDirection: 'column',
               gap: '8px'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <span style={{
-                  fontSize: '0.66rem',
+                  fontSize: '0.68rem',
                   fontWeight: 800,
                   padding: '2px 8px',
                   borderRadius: '4px',
-                  backgroundColor: activeDetail.risk === 'CRITICAL' ? 'var(--accent-red-bg)' : 'var(--accent-amber-bg)',
-                  color: activeDetail.risk === 'CRITICAL' ? 'var(--accent-red-glow)' : 'var(--accent-amber)',
+                  backgroundColor: activeDetail.risk === 'CRITICAL' ? 'var(--accent-red-bg)' : activeDetail.risk === 'HIGH' ? 'var(--accent-amber-bg)' : 'var(--bg-input)',
+                  color: activeDetail.risk === 'CRITICAL' ? 'var(--accent-red)' : activeDetail.risk === 'HIGH' ? 'var(--accent-amber)' : 'var(--text-secondary)',
                   border: '1px solid var(--border-glass)'
                 }}>
                   RISK: {activeDetail.risk}
                 </span>
                 <button 
                   onClick={() => setSelectedNode(null)}
-                  style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '0.75rem' }}
+                  style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '0.85rem' }}
                 >
                   ✕
                 </button>
               </div>
 
               <div>
-                <div style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-bright)' }}>
+                <div style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--text-bright)' }}>
                   {activeDetail.title}
                 </div>
-                <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)' }}>
                   {activeDetail.type}
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', fontSize: '0.68rem', backgroundColor: 'var(--bg-card-header)', padding: '5px 8px', borderRadius: '4px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', fontSize: '0.70rem', backgroundColor: 'var(--bg-card-header)', padding: '6px 10px', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
                 <div>
                   <span style={{ color: 'var(--text-muted)', display: 'block' }}>Connected:</span>
                   <strong style={{ color: 'var(--text-bright)' }}>{activeDetail.connectedComponents} Nodes</strong>
                 </div>
                 <div>
                   <span style={{ color: 'var(--text-muted)', display: 'block' }}>Attack Paths:</span>
-                  <strong style={{ color: 'var(--accent-red-glow)' }}>{activeDetail.attackPaths} Active</strong>
+                  <strong style={{ color: 'var(--accent-red)' }}>{activeDetail.attackPaths} Active</strong>
                 </div>
               </div>
 
-              <div style={{ fontSize: '0.68rem', color: 'var(--text-secondary)', lineHeight: 1.35 }}>
-                <span style={{ color: 'var(--text-muted)', display: 'block', fontWeight: 600 }}>Potential Impact:</span>
+              <div style={{ fontSize: '0.70rem', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+                <span style={{ color: 'var(--text-bright)', display: 'block', fontWeight: 700, marginBottom: '2px' }}>Potential Impact:</span>
                 {activeDetail.impact}
               </div>
 
-              <div style={{ fontSize: '0.64rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', borderTop: '1px solid var(--border-subtle)', paddingTop: '4px' }}>
+              <div style={{ fontSize: '0.66rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', borderTop: '1px solid var(--border-subtle)', paddingTop: '6px' }}>
                 Last Verified: {activeDetail.lastTested}
               </div>
             </div>
@@ -600,16 +602,16 @@ export const DigitalTwinGraph: React.FC<DigitalTwinGraphProps> = ({ onNavigateTa
         {viewMode === 'graph' ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ width: '16px', height: '2px', backgroundColor: '#6B7280' }} />
-              Normal Connection
+              <span style={{ width: '16px', height: '2px', backgroundColor: 'var(--text-muted)' }} />
+              <span style={{ color: 'var(--text-secondary)' }}>Normal Connection</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{ width: '16px', height: '2px', borderTop: '2px dashed #EF4444' }} />
-              High Risk Path
+              <span style={{ color: 'var(--text-secondary)' }}>High Risk Path</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#FF2E2E' }} />
-              Data Flow
+              <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#EF4444' }} />
+              <span style={{ color: 'var(--text-secondary)' }}>Data Flow</span>
             </div>
           </div>
         ) : (
@@ -630,11 +632,11 @@ export const DigitalTwinGraph: React.FC<DigitalTwinGraphProps> = ({ onNavigateTa
               alignItems: 'center',
               gap: '4px',
               fontSize: '0.72rem',
-              color: 'var(--accent-blue-glow)',
+              color: 'var(--accent-blue)',
               background: 'none',
               border: 'none',
               cursor: 'pointer',
-              fontWeight: 600
+              fontWeight: 700
             }}
           >
             <span>Full 3D Topology</span>
