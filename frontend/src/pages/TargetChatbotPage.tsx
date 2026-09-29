@@ -105,6 +105,7 @@ export const TargetChatbotPage: React.FC<TargetChatbotProps> = ({
   const [selectedAnalysis, setSelectedAnalysis] = useState<SecurityAnalysis | null>(messages[2].analysis || null);
   const [drawerOpen, setDrawerOpen] = useState(true);
   const [openSection, setOpenSection] = useState<'indicators' | 'path' | 'evidence'>('indicators');
+  const executedPromptRef = useRef<string | null>(null);
   const [documents, setDocuments] = useState<DocumentMeta[]>([
     { filename: 'CORP_EXEC_Q3.pdf', pages: 12, chunks_created: 34, char_count: 14200, poisoned: true }
   ]);
@@ -428,11 +429,15 @@ export const TargetChatbotPage: React.FC<TargetChatbotProps> = ({
 
   useEffect(() => {
     if (initialPrompt && initialPrompt.trim()) {
+      if (executedPromptRef.current === initialPrompt) return;
+      executedPromptRef.current = initialPrompt;
       const promptToSend = initialPrompt;
       if (onClearInitialPrompt) {
         onClearInitialPrompt();
       }
       handleSendMessage(promptToSend);
+    } else if (!initialPrompt) {
+      executedPromptRef.current = null;
     }
   }, [initialPrompt]);
 

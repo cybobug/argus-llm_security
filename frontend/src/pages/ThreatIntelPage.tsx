@@ -430,6 +430,7 @@ export const ThreatIntelPage: React.FC<ThreatIntelProps> = ({ onNavigateTab, onS
           )}
 
           <button 
+            disabled={!!simulatingStatus}
             onClick={() => {
               setSimulatingStatus(`Payload for ${activeThreatItem.id} dispatched to Target Chatbot.`);
               setTimeout(() => {
@@ -438,12 +439,24 @@ export const ThreatIntelPage: React.FC<ThreatIntelProps> = ({ onNavigateTab, onS
                 } else if (onNavigateTab) {
                   onNavigateTab('target-chatbot');
                 }
-              }, 400);
+                setSimulatingStatus(null);
+              }, 300);
             }}
             className="btn-primary-red" 
-            style={{ marginTop: 'auto', width: '100%', padding: '9px', fontSize: '0.80rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+            style={{ 
+              marginTop: 'auto', 
+              width: '100%', 
+              padding: '9px', 
+              fontSize: '0.80rem', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              gap: '6px',
+              opacity: simulatingStatus ? 0.7 : 1,
+              cursor: simulatingStatus ? 'not-allowed' : 'pointer'
+            }}
           >
-            <Zap size={14} /> Simulate Payload in Target Lab
+            <Zap size={14} /> {simulatingStatus ? 'Dispatching Payload...' : 'Simulate Payload in Target Lab'}
           </button>
         </div>
 
