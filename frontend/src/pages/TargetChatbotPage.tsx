@@ -55,7 +55,15 @@ interface Message {
   analysis?: SecurityAnalysis;
 }
 
-export const TargetChatbotPage: React.FC = () => {
+interface TargetChatbotProps {
+  initialPrompt?: string | null;
+  onClearInitialPrompt?: () => void;
+}
+
+export const TargetChatbotPage: React.FC<TargetChatbotProps> = ({ 
+  initialPrompt, 
+  onClearInitialPrompt 
+}) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 'init-1',
@@ -417,6 +425,16 @@ export const TargetChatbotPage: React.FC = () => {
       setTelemetryStep(null);
     }
   };
+
+  useEffect(() => {
+    if (initialPrompt && initialPrompt.trim()) {
+      const promptToSend = initialPrompt;
+      if (onClearInitialPrompt) {
+        onClearInitialPrompt();
+      }
+      handleSendMessage(promptToSend);
+    }
+  }, [initialPrompt]);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

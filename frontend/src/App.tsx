@@ -36,12 +36,24 @@ export const App: React.FC = () => {
     localStorage.setItem('argus-theme', nextTheme);
   };
 
+  const [simulatedPrompt, setSimulatedPrompt] = useState<string | null>(null);
+
+  const handleSimulateThreat = (payload: string) => {
+    setSimulatedPrompt(payload);
+    setActiveTab('target-chatbot');
+  };
+
   const renderActivePage = () => {
     switch (activeTab) {
       case 'overview':
         return <DashboardOverview onOpenScanModal={() => setIsScanModalOpen(true)} onNavigateTab={setActiveTab} />;
       case 'target-chatbot':
-        return <TargetChatbotPage />;
+        return (
+          <TargetChatbotPage 
+            initialPrompt={simulatedPrompt} 
+            onClearInitialPrompt={() => setSimulatedPrompt(null)} 
+          />
+        );
       case 'digital-twin':
         return <DigitalTwinPage />;
       case 'scans':
@@ -51,7 +63,7 @@ export const App: React.FC = () => {
       case 'attack-paths':
         return <AttackPathsPage onNavigateTab={setActiveTab} />;
       case 'threat-intel':
-        return <ThreatIntelPage onNavigateTab={setActiveTab} />;
+        return <ThreatIntelPage onNavigateTab={setActiveTab} onSimulateThreat={handleSimulateThreat} />;
       case 'reports':
         return <ReportsPage />;
       case 'integrations':
